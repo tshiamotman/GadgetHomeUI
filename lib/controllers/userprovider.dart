@@ -1,15 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:gadgethome/apirequests/apirequests.dart';
 import 'package:gadgethome/constants/constants.dart';
-import 'package:gadgethome/models/ad.dart';
 import 'package:gadgethome/models/user.dart';
 
 class UserProvider extends ChangeNotifier {
   late User user;
 
-  late String token;
+  late Uint8List userProfilePicture;
 
-  Map<String, List<Ad>> ads = {};
   Map response = {};
 
   bool loggedIn = false;
@@ -22,11 +23,9 @@ class UserProvider extends ChangeNotifier {
 
       if (response["error"] == false && response["message"] == "Logged In") {
         user = User.fromJson(response["user"]);
-        token = response["token"];
-        print("Logged in");
+        BEARER_TOKEN = response["token"];
         loggedIn = true;
       } else {
-        print("Login failed");
         loggedIn = false;
       }
     });
@@ -41,7 +40,7 @@ class UserProvider extends ChangeNotifier {
 
       if (response["error"] == "false" &&
           response["message"] == "Account created successfully") {
-        token = response["token"];
+        BEARER_TOKEN = response["token"];
         loggedIn = true;
         return true;
       }
@@ -50,48 +49,19 @@ class UserProvider extends ChangeNotifier {
     });
   }
 
-  List<Ad> getAllAds() {
-    List<Ad> ads = [];
-    getAds(token).then((value) {
-      for (var ad in value) {
-        ads.add(ad);
+  Future<Uint8List> getProfilePicture(String username) {
+    return getUserImage(username, BEARER_TOKEN).then((value) {
+      if (username == user.userName) {
+        userProfilePicture = value;
       }
-    });
-    return ads;
-  }
-
-  Future<List<Ad>> getAdsByKey(String keyword) async {
-    List<Ad> adsList = [];
-    getAdsByKeyword(keyword, token).then((value) {
-      print("starting to fetch: $keyword");
-      for (var ad in value) {
-        adsList.add(ad);
+      return value;
+    }).onError((error, stackTrace) async {
+      final ByteData bytes = await rootBundle.load(AVATAR_PLACEHOLDER);
+      var value = bytes.buffer.asUint8List();
+      if (username == user.userName) {
+        userProfilePicture = value;
       }
-      ads.addAll({keyword: adsList});
-      notifyListeners();
-    });
-    return adsList;
-  }
-
-  Ad? getAdId(int id) {
-    Ad? ad;
-    getAd(id, token).then((value) {
-      ad = value;
-    });
-
-    return ad;
-  }
-
-  Future<bool> postAd(Map ad) {
-    Map response = {};
-    int id;
-    return addPost(ad, token).then((value) {
-      response.addAll(value);
-      if (response["id"] != null) {
-        id = response["id"];
-        return true;
-      }
-      return false;
+      return value;
     });
   }
 }

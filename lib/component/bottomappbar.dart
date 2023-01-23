@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gadgethome/constants/constants.dart';
+import 'package:gadgethome/controllers/messageprovider.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavAppBar extends StatelessWidget {
   const BottomNavAppBar({
@@ -8,6 +10,7 @@ class BottomNavAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final messageController = Provider.of<MessageProvider>(context);
     return BottomAppBar(
       notchMargin: 4,
       shape: AutomaticNotchedShape(const RoundedRectangleBorder(),
@@ -28,7 +31,10 @@ class BottomNavAppBar extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.message),
-              onPressed: () {},
+              onPressed: () {
+                messageController.getToken();
+                Navigator.pushNamed(context, MESSAGES_SCREEN);
+              },
             )
           ],
         ),

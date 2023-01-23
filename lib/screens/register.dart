@@ -74,8 +74,8 @@ class _RegisterScreen extends State<RegisterScreen> {
       body: SizedBox(
         height: size.height,
         width: size.width,
-        child: SingleChildScrollView(
-          child: Background(
+        child: Background(
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

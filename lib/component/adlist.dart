@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gadgethome/controllers/userprovider.dart';
+import 'package:gadgethome/controllers/adprovider.dart';
 import 'package:gadgethome/models/ad.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +35,7 @@ class AdList extends StatelessWidget {
           } else {
             return SizedBox(
               height: _height,
-              child: Consumer<UserProvider>(
+              child: Consumer<AdProvider>(
                 builder: (context, controller, child) => ListView.builder(
                   padding: const EdgeInsets.all(5),
                   shrinkWrap: true,

@@ -4,9 +4,8 @@ import 'package:gadgethome/component/bottomappbar.dart';
 import 'package:gadgethome/component/customshape.dart';
 import 'package:gadgethome/component/gadgetdrawer.dart';
 import 'package:gadgethome/constants/constants.dart';
+import 'package:gadgethome/controllers/adprovider.dart';
 import 'package:gadgethome/controllers/userprovider.dart';
-import 'package:gadgethome/models/ad.dart';
-import 'package:gadgethome/screens/searchscreen.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/src/provider.dart';
 
@@ -259,14 +258,15 @@ class _HomePageState extends State<HomePage> {
     _height = MediaQuery.of(context).size.height;
     _width = MediaQuery.of(context).size.width;
 
-    final controller = Provider.of<UserProvider>(context, listen: false);
+    final adController = Provider.of<AdProvider>(context, listen: false);
+    final userController = Provider.of<UserProvider>(context, listen: false);
 
     return Scaffold(
       key: scaffoldKey,
       drawer: GadgetDrawer(
           height: _height,
-          username: controller.user.userName,
-          email: controller.user.email),
+          username: userController.user.userName,
+          email: userController.user.email),
       bottomNavigationBar: const BottomNavAppBar(),
       floatingActionButton: fab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -286,7 +286,7 @@ class _HomePageState extends State<HomePage> {
               AdList(
                   height: _height / 4,
                   keyword: "cellphone",
-                  provider: controller.getAdsByKey("cellphone"),
+                  provider: adController.getAdsByKey("cellphone"),
                   direction: Axis.horizontal),
               const Divider(),
               topicContainer("Computers", () {
@@ -296,7 +296,7 @@ class _HomePageState extends State<HomePage> {
               AdList(
                   height: _height / 4,
                   keyword: "Computer",
-                  provider: controller.getAdsByKey("Computer"),
+                  provider: adController.getAdsByKey("Computer"),
                   direction: Axis.horizontal),
               const Divider(),
               topicContainer("Apple", () {
@@ -305,7 +305,7 @@ class _HomePageState extends State<HomePage> {
               AdList(
                   height: _height / 4,
                   keyword: "Apple",
-                  provider: controller.getAdsByKey("Apple"),
+                  provider: adController.getAdsByKey("Apple"),
                   direction: Axis.horizontal),
             ],
           ),

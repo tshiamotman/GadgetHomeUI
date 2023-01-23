@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:gadgethome/component/adlist.dart';
 import 'package:gadgethome/component/customshape.dart';
 import 'package:gadgethome/component/bottomappbar.dart';
 import 'package:gadgethome/component/gadgetdrawer.dart';
 import 'package:gadgethome/constants/constants.dart';
+import 'package:gadgethome/controllers/adprovider.dart';
 import 'package:gadgethome/controllers/userprovider.dart';
 import 'package:gadgethome/models/ad.dart';
 import 'package:provider/provider.dart';
@@ -128,6 +127,7 @@ class _SearchScreen extends State<SearchScreen> {
     _width = MediaQuery.of(context).size.width;
 
     final controller = Provider.of<UserProvider>(context, listen: false);
+    final adController = Provider.of<AdProvider>(context, listen: false);
 
     return Scaffold(
       drawer: GadgetDrawer(
@@ -143,7 +143,7 @@ class _SearchScreen extends State<SearchScreen> {
           const Divider(),
           Expanded(
             child: buildList(
-              controller.getAdsByKey(searchKey),
+              adController.getAdsByKey(searchKey),
             ),
           )
         ],
@@ -165,7 +165,7 @@ class _SearchScreen extends State<SearchScreen> {
               child: Text("Failed to load"),
             );
           } else {
-            return Consumer<UserProvider>(
+            return Consumer<AdProvider>(
               builder: (context, controller, child) => ListView.builder(
                 padding: const EdgeInsets.all(5),
                 itemCount: controller.ads[searchKey] == null

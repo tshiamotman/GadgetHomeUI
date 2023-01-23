@@ -4,18 +4,17 @@ import 'dart:typed_data';
 
 import 'package:gadgethome/constants/constants.dart';
 import 'package:gadgethome/models/ad.dart';
+import 'package:gadgethome/models/chat.dart';
 import 'package:gadgethome/models/user.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map> login(String username, String password) async {
-  final response = await http.post(Uri.parse(API_URL + '/auth/login'),
+  final response = await http.post(Uri.parse('$API_URL/auth/login'),
       headers: {
         HttpHeaders.authorizationHeader: 'authorization',
         "Content-Type": "application/json"
       },
       body: jsonEncode({'user_name': username, 'password': password}));
-
-  print(response.body);
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body);
@@ -25,12 +24,12 @@ Future<Map> login(String username, String password) async {
 }
 
 Future<Map> register(User user) async {
-  final response = await http.post(Uri.parse(API_URL + '/auth/register'),
+  final response = await http.post(Uri.parse('$API_URL/auth/register'),
       headers: {
         HttpHeaders.authorizationHeader: 'authorization',
         "Content-Type": "application/json"
       },
-      body: jsonEncode(user.toJson()));
+      body: jsonEncode(user));
 
   print(response.body);
 
@@ -41,9 +40,9 @@ Future<Map> register(User user) async {
   }
 }
 
-Future<List<Ad>> getAds(String token) async {
+Future<List<Ad>> getAds(String token, int page) async {
   var response = await http.get(
-    Uri.parse(API_URL + '/ads/posts'),
+    Uri.parse('$API_URL/ads/posts'),
     headers: {
       HttpHeaders.authorizationHeader: "Bearer $token",
     },
@@ -78,7 +77,7 @@ Future<List<Ad>> getAds(String token) async {
 Future<List<Ad>> getAdsByKeyword(String keyword, String token) async {
   print("getting ads: $keyword");
   var response = await http.get(
-    Uri.parse(API_URL + '/ads/posts/key/' + keyword),
+    Uri.parse('$API_URL/ads/posts/key/$keyword'),
     headers: {
       HttpHeaders.authorizationHeader: "Bearer $token",
     },
@@ -113,7 +112,7 @@ Future<List<Ad>> getAdsByKeyword(String keyword, String token) async {
 
 Future<Ad> getAd(int id, String token) async {
   var response = await http.get(
-    Uri.parse(API_URL + '/ads/posts/id/' + id.toString()),
+    Uri.parse('$API_URL/ads/posts/id/$id'),
     headers: {
       HttpHeaders.authorizationHeader: "Bearer $token",
     },
@@ -126,7 +125,7 @@ Future<Ad> getAd(int id, String token) async {
     ad = Ad.fromJson(jsonDecode(response.body));
 
     response = await http.get(
-      Uri.parse(API_URL + '/images/images/' + id.toString()),
+      Uri.parse('$API_URL/images/images/$id'),
       headers: {
         HttpHeaders.authorizationHeader: "Bearer $token",
       },
@@ -158,5 +157,110 @@ Future<Map> addPost(Map ad, String token) async {
     return jsonDecode(response.body);
   } else {
     throw Exception('Failed to post Ad');
+  }
+}
+
+Future<Map> updateDeviceId(
+    User user, String fcmToken, String bearerToken) async {
+  Map<String, String> requestBody = user.toJson();
+  requestBody.addAll({"token": fcmToken});
+  final response = await http.post(Uri.parse('$API_URL/chat/updateDeviceId'),
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $bearerToken",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody));
+
+  print(response.body);
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to login');
+  }
+}
+
+Future<Map> updateMessageRead(String messageId, String bearerToken) async {
+  final response = await http
+      .get(Uri.parse('$API_URL/chat/messageRead/$messageId'), headers: {
+    HttpHeaders.authorizationHeader: "Bearer $bearerToken",
+    "Content-Type": "application/json"
+  });
+
+  print(response.body);
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to login');
+  }
+}
+
+Future<Map> sendMessage(Chat chat, String bearerToken) async {
+  Map<String, dynamic> requestBody = chat.toJson();
+  final response = await http.post(Uri.parse('$API_URL/sendMessage'),
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $bearerToken",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody));
+
+  print(response.body);
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to login');
+  }
+}
+
+Future<Map<String, List<Chat>>> getConversations(String token) async {
+  final response = await http.get(
+    Uri.parse('$API_URL/chat/getConversations'),
+    headers: {
+      HttpHeaders.authorizationHeader: "Bearer $token",
+      "Content-Type": "application/json"
+    },
+  );
+
+  print(response.body);
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to login');
+  }
+}
+
+Future<Uint8List> getUserImage(String username, String token) async {
+  final response = await http.get(
+    Uri.parse("$API_URL/user/getUser/$username"),
+    headers: {
+      HttpHeaders.authorizationHeader: "Bearer $token",
+    },
+  );
+
+  Uint8List image = base64Decode(base64.encode(response.bodyBytes));
+
+  if (response.statusCode == 200) {
+    return image;
+  } else {
+    throw Exception('Failed to login');
+  }
+}
+
+Future<Map> addUserImage(File image) async {
+  String url = '$API_URL/user/addPicture';
+  var bytes = image.readAsBytesSync();
+
+  final response = await http.post(Uri.parse(url),
+      headers: {"Content-Type": "multipart/form-data"},
+      body: {"lang": "fas", "image": bytes},
+      encoding: Encoding.getByName("utf-8"));
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to login');
   }
 }

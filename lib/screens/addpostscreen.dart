@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:gadgethome/component/background.dart';
 import 'package:gadgethome/component/bottomappbar.dart';
 import 'package:gadgethome/component/gadgetdrawer.dart';
+import 'package:gadgethome/component/headerafterlogin.dart';
 import 'package:gadgethome/constants/constants.dart';
+import 'package:gadgethome/controllers/adprovider.dart';
 import 'package:gadgethome/controllers/userprovider.dart';
 import 'package:provider/provider.dart';
 
@@ -15,8 +16,9 @@ class AddPost extends StatefulWidget {
 }
 
 class _AddPost extends State<AddPost> {
-  late final double _width;
-  late final double _height;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+  late double _width;
+  late double _height;
 
   String dropdownvalue = 'camera';
 
@@ -69,8 +71,8 @@ class _AddPost extends State<AddPost> {
   }
 
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
-    onPrimary: Colors.black87,
-    primary: Colors.grey[300],
+    foregroundColor: Colors.black87, 
+    backgroundColor: Colors.grey[300],
     minimumSize: const Size(88, 36),
     padding: const EdgeInsets.symmetric(horizontal: 16),
     shape: RoundedRectangleBorder(
@@ -94,6 +96,7 @@ class _AddPost extends State<AddPost> {
     _width = MediaQuery.of(context).size.width;
 
     final controller = Provider.of<UserProvider>(context, listen: false);
+    final adController = Provider.of<AdProvider>(context, listen: false);
 
     return Scaffold(
       drawer: GadgetDrawer(
@@ -105,14 +108,15 @@ class _AddPost extends State<AddPost> {
         height: _height,
         width: _width,
         child: SingleChildScrollView(
-          child: Background(
+          child: HeaderAfterLogin(
+            scaffoldKey: scaffoldKey,
             child: Column(
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: const Text(
-                    "ADD Post",
+                    "Add New Ad",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF2661FA),
@@ -142,7 +146,7 @@ class _AddPost extends State<AddPost> {
                         "amount": priceController.text
                       };
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      controller.postAd(map).whenComplete(
+                      adController.postAd(map).whenComplete(
                           () => Navigator.pushNamed(context, MAIN_UI));
                     },
                     child: Container(
